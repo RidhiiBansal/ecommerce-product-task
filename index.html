@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>E-Commerce Product Listing</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f4f6f9;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    /* Sticky control bar */
+    .controls {
+      position: sticky;
+      top: 0;
+      background: #f4f6f9;
+      padding: 15px 0;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      z-index: 10;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .controls label {
+      font-size: 14px;
+      color: #333;
+    }
+
+    select {
+      padding: 6px 10px;
+      margin-left: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+
+    button {
+      padding: 7px 14px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #555;
+    }
+
+    .count {
+      text-align: center;
+      margin: 15px 0;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .price {
+      font-weight: bold;
+      color: #2e7d32;
+      margin: 5px 0;
+    }
+
+    .rating {
+      color: #ff9800;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 12px;
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #777;
+      font-size: 18px;
+      padding: 30px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Product Store</h1>
+<p class="subtitle">Filter and sort products using dropdowns</p>
+
+<div class="controls">
+  <label>
+    Category
+    <select id="categoryFilter">
+      <option value="all">All</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Clothing">Clothing</option>
+      <option value="Books">Books</option>
+      <option value="Home">Home</option>
+    </select>
+  </label>
+
+  <label>
+    Price
+    <select id="priceFilter">
+      <option value="all">All</option>
+      <option value="0-1000">Below ₹1000</option>
+      <option value="1000-5000">₹1000 – ₹5000</option>
+      <option value="5000-20000">₹5000 – ₹20000</option>
+      <option value="20000+">Above ₹20000</option>
+    </select>
+  </label>
+
+  <label>
+    Sort
+    <select id="sortOption">
+      <option value="">None</option>
+      <option value="price-asc">Price ↑</option>
+      <option value="price-desc">Price ↓</option>
+      <option value="name-asc">Name A–Z</option>
+      <option value="name-desc">Name Z–A</option>
+      <option value="rating-asc">Rating ↑</option>
+      <option value="rating-desc">Rating ↓</option>
+    </select>
+  </label>
+
+  <button id="resetBtn">Reset</button>
+</div>
+
+<p class="count" id="productCount"></p>
+
+<div class="products" id="productContainer"></div>
+
+<script>
+  const products = [
+    { name: "Laptop", price: 60000, rating: 4.5, category: "Electronics" },
+    { name: "Smartphone", price: 30000, rating: 4.2, category: "Electronics" },
+    { name: "Headphones", price: 2500, rating: 4.1, category: "Electronics" },
+    { name: "Smart Watch", price: 5500, rating: 4.3, category: "Electronics" },
+    { name: "Tablet", price: 20000, rating: 4.4, category: "Electronics" },
+
+    { name: "T-Shirt", price: 800, rating: 4.0, category: "Clothing" },
+    { name: "Jeans", price: 1500, rating: 4.2, category: "Clothing" },
+    { name: "Jacket", price: 3200, rating: 4.5, category: "Clothing" },
+    { name: "Dress", price: 2200, rating: 4.1, category: "Clothing" },
+    { name: "Shoes", price: 2600, rating: 4.3, category: "Clothing" },
+
+    { name: "Novel", price: 450, rating: 4.4, category: "Books" },
+    { name: "Notebook", price: 150, rating: 4.0, category: "Books" },
+    { name: "Biography", price: 650, rating: 4.6, category: "Books" },
+    { name: "Cookbook", price: 520, rating: 4.2, category: "Books" },
+    { name: "Textbook", price: 900, rating: 4.1, category: "Books" },
+
+    { name: "Chair", price: 3500, rating: 4.0, category: "Home" },
+    { name: "Table", price: 7000, rating: 4.3, category: "Home" },
+    { name: "Lamp", price: 1200, rating: 4.1, category: "Home" },
+    { name: "Sofa", price: 25000, rating: 4.6, category: "Home" },
+    { name: "Bookshelf", price: 8000, rating: 4.4, category: "Home" }
+  ];
+
+  const productContainer = document.getElementById("productContainer");
+  const productCount = document.getElementById("productCount");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const priceFilter = document.getElementById("priceFilter");
+  const sortOption = document.getElementById("sortOption");
+  const resetBtn = document.getElementById("resetBtn");
+
+  function renderProducts(list) {
+    productContainer.innerHTML = "";
+
+    productCount.textContent = `Showing ${list.length} product(s)`;
+
+    if (list.length === 0) {
+      productContainer.innerHTML = `<div class="empty">No products found</div>`;
+      return;
+    }
+
+    list.forEach(p => {
+      const stars = "★".repeat(Math.round(p.rating));
+
+      productContainer.innerHTML += `
+        <div class="card">
+          <h3>${p.name}</h3>
+          <p class="price">₹${p.price.toLocaleString()}</p>
+          <p class="rating">${stars} (${p.rating})</p>
+          <span class="badge">${p.category}</span>
+        </div>
+      `;
+    });
+  }
+
+  function updateProducts() {
+    let result = [...products];
+
+    if (categoryFilter.value !== "all") {
+      result = result.filter(p => p.category === categoryFilter.value);
+    }
+
+    if (priceFilter.value !== "all") {
+      result = result.filter(p => {
+        if (priceFilter.value === "0-1000") return p.price < 1000;
+        if (priceFilter.value === "1000-5000") return p.price >= 1000 && p.price <= 5000;
+        if (priceFilter.value === "5000-20000") return p.price > 5000 && p.price <= 20000;
+        if (priceFilter.value === "20000+") return p.price > 20000;
+      });
+    }
+
+    switch (sortOption.value) {
+      case "price-asc": result.sort((a,b)=>a.price-b.price); break;
+      case "price-desc": result.sort((a,b)=>b.price-a.price); break;
+      case "name-asc": result.sort((a,b)=>a.name.localeCompare(b.name)); break;
+      case "name-desc": result.sort((a,b)=>b.name.localeCompare(a.name)); break;
+      case "rating-asc": result.sort((a,b)=>a.rating-b.rating); break;
+      case "rating-desc": result.sort((a,b)=>b.rating-a.rating); break;
+    }
+
+    renderProducts(result);
+  }
+
+  categoryFilter.addEventListener("change", updateProducts);
+  priceFilter.addEventListener("change", updateProducts);
+  sortOption.addEventListener("change", updateProducts);
+
+  resetBtn.addEventListener("click", () => {
+    categoryFilter.value = "all";
+    priceFilter.value = "all";
+    sortOption.value = "";
+    renderProducts(products);
+  });
+
+  renderProducts(products);
+</script>
+
+</body>
+</html>
+
+
+
